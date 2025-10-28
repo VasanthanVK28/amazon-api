@@ -65,7 +65,7 @@ return [
 
         'mongodb' => [
             'driver' => 'mongodb',
-            'host' => env('DB_HOST', '127.0.0.1'),
+            'dsn'      => env('DB_DSN', 'mongodb://127.0.0.1:27017'),
             'port' => env('DB_PORT', 27017),
             'database' => env('DB_DATABASE', 'amazon_scraper'),
             'username' => env('DB_USERNAME', ''),
