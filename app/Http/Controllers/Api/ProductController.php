@@ -264,6 +264,8 @@ public function filter(Request $request)
             }
         }
 
-        return response()->json(['message' => 'Product not found'], 404);
+        return response()->json(['message' => 'Product not found', 'asin' => $asin], 404);
+
     }
+    
 }

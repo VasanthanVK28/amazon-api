@@ -27,35 +27,32 @@ class AuthController extends Controller
      */
     
     public function register(Request $request)
-    {
-        // Decode JSON body into an associative array
-        $data = json_decode($request->getContent(), true);
+{
+    // ✅ Laravel automatically parses JSON input
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        // Validate input data
-        $validated = validator($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ])->validate();
+    // ✅ Create user
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'api_key' => Str::random(60),
+    ]);
 
-        // Create new user with hashed password
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'api_key' => Str::random(60), // 👈 unique API key per user
-        ]);
-
-        return response()->json([
-            'message' => '✅ User registered successfully!',
-            'user' => $user
-        ], 201);
-    }
+    return response()->json([
+        'message' => '✅ User registered successfully!',
+        'user' => $user
+    ], 201);
+}
 
     /**
      * 🔐 User login and issue JWT token
      */
-    public function login(Request $request)
+   public function login(Request $request)
 {
     $credentials = $request->only('email', 'password');
 
@@ -70,18 +67,25 @@ class AuthController extends Controller
     // ✅ Get authenticated user
     $user = JWTAuth::user();
 
-    // 🔁 Optional: generate new API key on each login
-    $user->api_key = Str::random(60);
-    $user->save();
+    // ✅ Only create API key once (if not already set)
+    if (empty($user->api_key)) {
+        $user->api_key = Str::random(60);
+        $user->save();
+    }
 
     return response()->json([
         'message' => '✅ Login successful',
         'token' => $token,
         'token_type' => 'bearer',
         'expires_in' => JWTAuth::factory()->getTTL() * 60,
-        'api_key' => $user->api_key, // 👈 include it in response
+        'api_key' => $user->api_key, // 👈 Always return same API key
+         'user' => [
+        'name' => $user->name,
+        'email' => $user->email,
+    ],
     ]);
 }
+
 
     /**
      * 👤 Get the authenticated user (using Bearer token)

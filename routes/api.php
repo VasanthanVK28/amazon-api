@@ -45,10 +45,14 @@ $kernel = app(Kernel::class);
 #dd(app('router')->getMiddleware());
 
 // ✅ EXTERNAL API ROUTES (rate-limited + secured)
-Route::middleware('check.apikey')->group(function () {
+// ✅ External Public API (secured with API key only)
+Route::middleware(['check.apikey'])->group(function () {
     Route::get('external/products', [ProductController::class, 'index']);
-     Route::get('external/products/filter', [ProductController::class, 'filter']);
+    Route::get('external/products/filter', [ProductController::class, 'filter']);
+    Route::get('external/products/{asin}', [ProductController::class, 'show']); // ✅ ADD THIS LINE
+    
 });
+
 
 
 
