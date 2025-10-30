@@ -267,5 +267,30 @@ public function filter(Request $request)
         return response()->json(['message' => 'Product not found', 'asin' => $asin], 404);
 
     }
-    
+ 
+    public function getBrands(Request $request)
+{
+    $db = $this->getDB();
+    $category = strtolower($request->query('category'));
+    $collections = match($category) {
+        'laptop', 'laptops' => ['laptops'],
+        'mobile', 'mobiles' => ['mobiles'],
+        'shirt', 'shirts' => ['shirts'],
+        default => [],
+    };
+
+    $brands = [];
+    foreach ($collections as $collection) {
+        $items = $db->{$collection}->find([], ['projection' => ['brand' => 1]])->toArray();
+        foreach ($items as $item) {
+            if (!empty($item['brand'])) {
+                $brands[] = $item['brand'];
+            }
+        }
+    }
+
+    return response()->json(['brands' => array_values(array_unique($brands))]);
+}
+
+
 }

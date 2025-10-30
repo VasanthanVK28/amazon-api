@@ -50,6 +50,8 @@ Route::middleware(['check.apikey'])->group(function () {
     Route::get('external/products', [ProductController::class, 'index']);
     Route::get('external/products/filter', [ProductController::class, 'filter']);
     Route::get('external/products/{asin}', [ProductController::class, 'show']); // ✅ ADD THIS LINE
+    Route::get('external/products/brands', [ProductController::class, 'getBrands']);
+
     
 });
 
