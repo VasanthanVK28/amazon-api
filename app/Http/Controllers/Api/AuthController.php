@@ -48,7 +48,7 @@ class AuthController extends Controller
         'user' => $user
     ], 201);
 }
-
+    
     /**
      * 🔐 User login and issue JWT token
      */

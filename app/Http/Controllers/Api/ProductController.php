@@ -163,7 +163,7 @@ public function filter(Request $request)
         if (!empty($brandArray)) {
             $query['$and'][] = [
                 '$or' => array_map(fn($brand) => [
-                    'title' => ['$regex' => $brand, '$options' => 'i']
+                    'brand' => ['$regex' => $brand, '$options' => 'i']
                 ], $brandArray)
             ];
         }
@@ -217,6 +217,24 @@ public function filter(Request $request)
         return response()->json(['message' => 'No products found'], 404);
     }
 
+     $sortBy = $request->query('sort_by', 'rating'); // can be 'price' or 'rating'
+    $order = $request->query('order', 'desc'); // 'asc' or 'desc'
+
+    usort($allProducts, function($a, $b) use ($sortBy, $order) {
+        $aVal = $a[$sortBy] ?? 0;
+        $bVal = $b[$sortBy] ?? 0;
+        return $order === 'asc' ? $aVal <=> $bVal : $bVal <=> $aVal;
+    });
+
+    // 🏭 Brand counts (across all pages)
+    $brandCounts = [];
+    foreach ($allProducts as $product) {
+        $brand = strtolower(trim($product['brand'] ?? 'Unknown'));
+        if (!empty($brand)) {
+            $brandCounts[$brand] = ($brandCounts[$brand] ?? 0) + 1;
+        }
+    }
+
     // 📄 Pagination
     $page = (int) $request->get('page', 1);
     $perPage = 10;
@@ -228,6 +246,7 @@ public function filter(Request $request)
         'per_page' => $perPage,
         'total' => count($allProducts),
         'data' => $paginated,
+        'brand_counts' => $brandCounts,
     ]);
 }
 
@@ -271,13 +290,30 @@ public function filter(Request $request)
     public function getBrands(Request $request)
 {
     $db = $this->getDB();
-    $category = strtolower($request->query('category'));
-    $collections = match($category) {
-        'laptop', 'laptops' => ['laptops'],
-        'mobile', 'mobiles' => ['mobiles'],
-        'shirt', 'shirts' => ['shirts'],
-        default => [],
-    };
+    $categories = strtolower($request->query('category', ''));
+    $categoryArray = array_map('trim', explode(',', $categories));
+
+    $categoryMap = [
+        'laptop' => ['laptops'],
+        'laptops' => ['laptops'],
+        'mobile' => ['mobiles'],
+        'mobiles' => ['mobiles'],
+        'shirt' => ['shirts'],
+        'shirts' => ['shirts'],
+        'sofa' => ['sofas'],
+        'sofas' => ['sofas'],
+        'toy' => ['toys'],
+        'toys' => ['toys'],
+    ];
+
+    $collections = [];
+    foreach ($categoryArray as $cat) {
+        if (isset($categoryMap[$cat])) {
+            $collections = array_merge($collections, $categoryMap[$cat]);
+        }
+    }
+
+    $collections = array_unique($collections);
 
     $brands = [];
     foreach ($collections as $collection) {
@@ -289,8 +325,36 @@ public function filter(Request $request)
         }
     }
 
-    return response()->json(['brands' => array_values(array_unique($brands))]);
+    return response()->json([
+        'brands' => array_values(array_unique($brands)),
+    ]);
 }
+
+public function getCategories()
+{
+    $db = $this->getDB();
+    $collections = $this->collections ?? ['laptops', 'mobiles', 'shirts', 'sofas', 'toys'];
+
+    $categories = [];
+
+    foreach ($collections as $collection) {
+        $items = $db->{$collection}->find([], ['projection' => ['tags' => 1]])->toArray();
+        foreach ($items as $item) {
+            if (!empty($item['tags']) && is_array($item['tags'])) {
+                foreach ($item['tags'] as $tag) {
+                    $categories[] = strtolower(trim($tag));
+                }
+            } else {
+                $categories[] = $collection;
+            }
+        }
+    }
+
+    $categories = array_values(array_unique($categories));
+
+    return response()->json(['categories' => $categories]);
+}
+
 
 
 }

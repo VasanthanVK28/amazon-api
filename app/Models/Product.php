@@ -24,6 +24,7 @@ class Product extends Model
         'rating',
         'reviews',
         'tags',
+        'brand',
         'last_updated',
     ];
     protected $casts = [
