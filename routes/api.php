@@ -2,7 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\LayoutSettingController;
+use App\Http\Controllers\Api\ScheduleController;
+
 use App\Http\Kernel;
 Route::get('/debug-mongo', function () {
     try {
@@ -14,13 +18,28 @@ Route::get('/debug-mongo', function () {
     }
 });
 
+// ✅ Admin Authentication Routes
+Route::prefix('admin')->group(function () {
+    Route::post('/register', [AdminAuthController::class, 'register']);
+    Route::post('/login', [AdminAuthController::class, 'login']);
+    Route::post('/logout', [AdminAuthController::class, 'logout']);
+    Route::get('/profile', [AdminAuthController::class, 'profile']);
+});
+
+
 // 🔓 PUBLIC ROUTES (no throttle)
 Route::group([], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/filter', [ProductController::class, 'filter']);
+    
+
 });
+Route::post('/schedule-scrape', [ScheduleController::class, 'store']);
+
+Route::get('/layout-settings', [LayoutSettingController::class, 'getSettings']);
+Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings']);
 
 // 🔒 PROTECTED ROUTES (no throttle)
 Route::middleware(['jwt.auth'])->group(function () {
@@ -28,12 +47,15 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+   
 
     Route::prefix('products')->group(function () {
         Route::get('/{asin}', [ProductController::class, 'show']);
         Route::get('/{category}/{brand}/{rating}/{asin}', [ProductController::class, 'showDetailed']);
     });
     
+    
+
 });
 $kernel = app(Kernel::class);
 
