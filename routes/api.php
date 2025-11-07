@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\LayoutSettingController;
 use App\Http\Controllers\Api\ScheduleController;
+use App\Http\Controllers\Api\AnalyticsController;
+
 
 use App\Http\Kernel;
 Route::get('/debug-mongo', function () {
@@ -36,10 +38,21 @@ Route::group([], function () {
     
 
 });
+Route::get('/schedule-scrapes', [ScheduleController::class, 'index']);
 Route::post('/schedule-scrape', [ScheduleController::class, 'store']);
+
 
 Route::get('/layout-settings', [LayoutSettingController::class, 'getSettings']);
 Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings']);
+
+Route::prefix('analytics')->group(function () {
+    Route::get('/', [AnalyticsController::class, 'index']);                 // 📊 List all analytics
+    Route::get('/{product_id}', [AnalyticsController::class, 'show']);      // 🔍 Single product analytics
+    Route::post('/', [AnalyticsController::class, 'store']);                // ➕ Add or update analytics
+    Route::post('/track-impression', [AnalyticsController::class, 'trackImpression']); // 👁️ Track impression
+    Route::post('/track-click', [AnalyticsController::class, 'trackClick']);           // 🖱️ Track click
+});
+
 
 // 🔒 PROTECTED ROUTES (no throttle)
 Route::middleware(['jwt.auth'])->group(function () {

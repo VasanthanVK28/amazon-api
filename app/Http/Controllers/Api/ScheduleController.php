@@ -9,6 +9,13 @@ use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
+    public function index()
+    {
+        // Return schedules sorted by created date (latest first)
+        $schedules = ScrapeSchedule::orderBy('created_at', 'desc')->get();
+        return response()->json(['data' => $schedules]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -17,38 +24,30 @@ class ScheduleController extends Controller
             'scrapeDay' => 'nullable|string',
         ]);
 
-        // ✅ Determine current day for daily/hourly tasks
-        if ($validated['scrapeFrequency'] === 'daily' || $validated['scrapeFrequency'] === 'hourly') {
-            $day = strtolower(Carbon::now()->format('D')); // 'mon','tue'...
-        } else {
-            $day = $validated['scrapeDay'] ?? strtolower(Carbon::now()->format('D'));
+        $unique = ['frequency' => $validated['scrapeFrequency']];
+
+        if ($validated['scrapeFrequency'] === 'daily') {
+            $unique['time'] = $validated['scrapeTime'];
         }
 
-        // ✅ Deactivate previous active schedules
-        ScrapeSchedule::where('status', 'active')->update(['status' => 'inactive']);
+        if ($validated['scrapeFrequency'] === 'weekly') {
+            $unique['time'] = $validated['scrapeTime'];
+            $unique['day'] = $validated['scrapeDay'];
+        }
 
-        // ✅ Create new active schedule
-        $schedule = ScrapeSchedule::create([
-            'frequency' => $validated['scrapeFrequency'],
-            'time' => $validated['scrapeTime'] ?? '03:00',
-            'day' => $day,
-            'status' => 'active',
-        ]);
+        $schedule = ScrapeSchedule::updateOrCreate(
+            $unique,
+            [
+                'status' => 'active',
+                'last_run' => null,
+                'is_running' => false,
+                'updated_at' => now(),
+            ]
+        );
 
         return response()->json([
             'message' => '✅ Scraping task scheduled successfully!',
-            'data' => $schedule,
-        ], 201);
-    }
-
-    public function index()
-    {
-        $latest = ScrapeSchedule::orderBy('created_at', 'desc')->first();
-
-        if (!$latest) {
-            return response()->json(['message' => 'No scraping schedule found'], 404);
-        }
-
-        return response()->json($latest);
+            'data' => $schedule
+        ]);
     }
 }

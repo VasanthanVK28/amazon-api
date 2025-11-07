@@ -14,6 +14,8 @@ class ScrapeSchedule extends Eloquent
         'time',       // e.g., '03:00' for daily/weekly
         'day',        // 'mon', 'tue', ... for weekly
         'status',     // 'active' or 'inactive'
+        'last_run',
+        'is_running'
     ];
 
     protected $hidden = [
