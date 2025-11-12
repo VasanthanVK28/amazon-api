@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Client as MongoClient;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Routing\Controller as BaseController;
 class ProductController extends BaseController
 
@@ -18,7 +20,7 @@ class ProductController extends BaseController
     {
         // Public: index, show, filter
         // Protected: others (like create/update/delete if added)
-        $this->middleware('jwt.auth')->except(['index', 'show', 'filter']);
+        $this->middleware('jwt.auth')->except(['index', 'show', 'filter', 'embedProducts','defaultApiKey']);
     }
 
 
@@ -355,6 +357,37 @@ public function getCategories()
     return response()->json(['categories' => $categories]);
 }
 
+public function embedProducts(Request $request)
+{
+    $apiKey = $request->query('apiKey');
+
+    if (!$apiKey) {
+        return response()->json(['error' => 'API key is required'], 400);
+    }
+
+    $user = \App\Models\User::where('api_key', $apiKey)->first();
+
+    if (!$user) {
+        return response()->json(['error' => 'Invalid API key'], 401);
+    }
+
+    $products = \App\Models\Product::take(10)->get();
+
+    return response()->json($products);
+}
+
+// GET default API key
+public function defaultApiKey()
+{
+    // Pick a user with an API key as default
+    $user = \App\Models\User::whereNotNull('api_key')->first();
+
+    if (!$user) {
+        return response()->json(['error' => 'No default API key found'], 404);
+    }
+
+    return response()->json(['api_key' => $user->api_key]);
+}
 
 
 }

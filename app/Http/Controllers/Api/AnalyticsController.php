@@ -177,4 +177,29 @@ class AnalyticsController extends Controller
             return null;
         }
     }
+
+    /**
+ * 📈 Get total clicks & impressions day by day
+ */
+public function dailyStats(Request $request)
+{
+    $from = $request->filled('from') ? Carbon::parse($request->from)->startOfDay()->toDateString() : null;
+    $to = $request->filled('to') ? Carbon::parse($request->to)->endOfDay()->toDateString() : null;
+
+    $query = ProductAnalytics::query();
+
+    if ($from && $to) {
+        $query->whereBetween('date', [$from, $to]);
+    }
+
+    // Group by date and sum clicks & impressions
+    $stats = $query
+        ->selectRaw('date, SUM(clicks) as clicks, SUM(impressions) as impressions')
+        ->groupBy('date')
+        ->orderBy('date', 'asc')
+        ->get();
+
+    return response()->json($stats);
+}
+
 }

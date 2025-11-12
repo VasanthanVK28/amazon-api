@@ -9,6 +9,10 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\AnalyticsController;
 
 
+use App\Http\Controllers\Api\EmbedController;
+
+
+
 use App\Http\Kernel;
 Route::get('/debug-mongo', function () {
     try {
@@ -41,17 +45,29 @@ Route::group([], function () {
 Route::get('/schedule-scrapes', [ScheduleController::class, 'index']);
 Route::post('/schedule-scrape', [ScheduleController::class, 'store']);
 
+Route::get('/embed-widget/{api_key}', [EmbedController::class, 'getWidgetData']);
 
 Route::get('/layout-settings', [LayoutSettingController::class, 'getSettings']);
 Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings']);
 
-Route::prefix('analytics')->group(function () {
-    Route::get('/', [AnalyticsController::class, 'index']);                 // 📊 List all analytics
-    Route::get('/{product_id}', [AnalyticsController::class, 'show']);      // 🔍 Single product analytics
-    Route::post('/', [AnalyticsController::class, 'store']);                // ➕ Add or update analytics
-    Route::post('/track-impression', [AnalyticsController::class, 'trackImpression']); // 👁️ Track impression
-    Route::post('/track-click', [AnalyticsController::class, 'trackClick']);           // 🖱️ Track click
-});
+Route::get('/embed/popular-products', [ProductController::class, 'embedProducts']);
+Route::get('/default-api-key', [ProductController::class, 'defaultApiKey']);
+
+
+
+    
+
+    Route::prefix('analytics')->group(function () {
+        Route::get('/', [AnalyticsController::class, 'index']);                 // 📊 List all analytics
+        Route::get('/{product_id}', [AnalyticsController::class, 'show']);      // 🔍 Single product analytics
+        Route::post('/', [AnalyticsController::class, 'store']);                // ➕ Add or update analytics
+        Route::post('/track-impression', [AnalyticsController::class, 'trackImpression']); // 👁️ Track impression
+        Route::post('/track-click', [AnalyticsController::class, 'trackClick']);           // 🖱️ Track click
+        Route::get('/daily-stats', [AnalyticsController::class, 'dailyStats']);
+        Route::post('/analytics/track-page', [AnalyticsController::class, 'trackPage']);
+
+
+    });
 
 
 // 🔒 PROTECTED ROUTES (no throttle)
