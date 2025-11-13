@@ -22,4 +22,8 @@ class ScrapeSchedule extends Eloquent
         // Optional: hide MongoDB _id if you want cleaner API output
         '_id',
     ];
+
+    protected $casts = [
+        'last_run' => 'datetime', // ensures Laravel returns Carbon instance
+    ];
 }
