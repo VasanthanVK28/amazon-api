@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminAuthController extends Controller
 {
-    // ✅ Admin Register
+    // ------------------------ Admin Register ------------------------
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'username' => 'required|string|unique:admin',
-            'email' => 'required|email|unique:admin',
+            'username' => 'required|string|unique:admins,username',
+            'email' => 'required|email|unique:admins,email',
             'password' => 'required|min:6',
         ]);
 
@@ -25,15 +25,15 @@ class AdminAuthController extends Controller
         ]);
 
         return response()->json([
-            'message' => '✅ Admin registered successfully!',
+            'message' => 'Admin registered successfully!',
             'admin' => [
                 'username' => $admin->username,
                 'email' => $admin->email,
-            ],
-        ]);
+            ]
+        ], 201);
     }
 
-    // ✅ Admin Login
+    // ------------------------ Admin Login ------------------------
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -44,39 +44,46 @@ class AdminAuthController extends Controller
         $admin = Admin::where('email', $validated['email'])->first();
 
         if (!$admin || !Hash::check($validated['password'], $admin->password)) {
-            return response()->json(['message' => '❌ Invalid email or password'], 401);
+            return response()->json(['message' => 'Invalid email or password'], 401);
         }
 
-        // Create session manually
-        session(['admin_id' => $admin->_id, 'admin_email' => $admin->email]);
+        // Store admin session
+        session([
+            'admin_id' => $admin->id,   // use id, not _id
+            'admin_email' => $admin->email
+        ]);
 
         return response()->json([
-            'message' => '✅ Login successful!',
+            'message' => 'Login successful!',
             'admin' => [
                 'username' => $admin->username,
                 'email' => $admin->email,
-            ],
+            ]
         ]);
     }
 
-    // ✅ Admin Logout
+    // ------------------------ Admin Logout ------------------------
     public function logout()
     {
         session()->forget(['admin_id', 'admin_email']);
 
-        return response()->json(['message' => '✅ Logged out successfully']);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 
-    // ✅ Admin Profile (optional)
+    // ------------------------ Admin Profile ------------------------
     public function profile()
     {
         $adminId = session('admin_id');
 
         if (!$adminId) {
-            return response()->json(['message' => '❌ Not logged in'], 401);
+            return response()->json(['message' => 'Not logged in'], 401);
         }
 
         $admin = Admin::find($adminId);
+
+        if (!$admin) {
+            return response()->json(['message' => 'Admin not found'], 404);
+        }
 
         return response()->json([
             'username' => $admin->username,
