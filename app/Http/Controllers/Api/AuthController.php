@@ -80,6 +80,7 @@ class AuthController extends Controller
         'expires_in' => JWTAuth::factory()->getTTL() * 60,
         'api_key' => $user->api_key, // 👈 Always return same API key
          'user' => [
+         'id' => $user->id,
         'name' => $user->name,
         'email' => $user->email,
     ],
