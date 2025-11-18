@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\LayoutSettingController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\AnalyticsController;
-
+use App\Http\Controllers\Api\UserController;
 
 use App\Http\Controllers\Api\EmbedController;
 
@@ -53,7 +53,7 @@ Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings
 Route::get('/embed/popular-products', [ProductController::class, 'embedProducts']);
 Route::get('/default-api-key', [ProductController::class, 'defaultApiKey']);
 
-
+Route::get('/total-users', [UserController::class, 'totalUsers']);
 
     
 
