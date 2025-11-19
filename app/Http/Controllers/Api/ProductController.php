@@ -26,8 +26,11 @@ class ProductController extends BaseController
     // 🔹 MongoDB connection
     protected function getDB()
     {
-        $client = new MongoClient(env('MONGO_DB_URI', 'mongodb://127.0.0.1:27017'));
-        return $client->{$this->dbName};
+        $dsn = config('database.connections.mongodb.dsn');        // mongodb://127.0.0.1:27017
+        $database = config('database.connections.mongodb.database'); // amazon_scraper
+
+        $client = new MongoClient($dsn);
+        return $client->{$database};
     }
 
     // 🔹 Build product URL dynamically

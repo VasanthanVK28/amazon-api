@@ -29,7 +29,6 @@ class Laptop extends Model
         'price' => 'integer',
         'rating' => 'integer',
         'reviews' => 'integer',
-        'tags' => 'array',
         'last_updated' => 'datetime',
     ];
 }

@@ -21,11 +21,13 @@ class Mobile extends Model
         'title',
     ];
 
-    protected $casts = [
-        'price' => 'integer',
-        'rating' => 'float',
-        'reviews' => 'integer',
-        'tags' => 'array',
-        'last_updated' => 'datetime',
-    ];
+    protected $casts = ['price' => 'integer',
+                        'rating' => 'float',
+                        'reviews' => 'integer',
+                        'last_updated' => 'datetime',
+                        
+                        
+];
+    
+
 }

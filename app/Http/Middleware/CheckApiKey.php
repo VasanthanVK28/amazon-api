@@ -23,8 +23,8 @@ class CheckApiKey
 
         // 🔑 Accept API key from header OR query parameter
         $apiKey = $request->header('x-api-key')
-                 ?? $request->header('X-API-KEY')
-                 ?? $request->query('api_key'); // ✅ added support for browser URL
+                 ?? $request->header('X-API-KEY');
+                 
 
         // 🚨 Step 1: Check if API key is provided
         if (empty($apiKey)) {

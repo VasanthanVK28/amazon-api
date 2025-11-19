@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\ProductAnalytics;
 use Carbon\Carbon;
 use MongoDB\Client as Mongo;
+use Illuminate\Support\Facades\Log;
+use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
-
 class AnalyticsController extends Controller
 {
     /**
@@ -164,19 +165,21 @@ class AnalyticsController extends Controller
     /**
      * 🧠 Helper — Fetch product title from laptops collection
      */
-    private function fetchProductName($productId)
-    {
-        try {
-            $mongo = new Mongo(env('MONGO_DSN', 'mongodb://127.0.0.1:27017'));
-            $db = $mongo->selectDatabase(env('DB_DATABASE', 'amazon_clone'));
-            $laptops = $db->selectCollection('laptops');
+    private function fetchProductName($productId, $collection = 'laptops')
+{
+    try {
+        $client = new MongoClient(config('database.connections.mongodb.dsn'));
+        $db = $client->{config('database.connections.mongodb.database')};
+        $col = $db->{$collection};
 
-            $product = $laptops->findOne(['_id' => new ObjectId($productId)]);
-            return $product['title'] ?? null;
-        } catch (\Exception $e) {
-            return null;
-        }
+        $product = $col->findOne(['_id' => new ObjectId($productId)]);
+        return $product['title'] ?? null;
+
+    } catch (\Exception $e) {
+        Log::error("MongoDB fetchProductName error: ".$e->getMessage());
+        return null;
     }
+}
 
     /**
  * 📈 Get total clicks & impressions day by day

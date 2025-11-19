@@ -8,9 +8,12 @@ use App\Http\Controllers\LayoutSettingController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\UserController;
-
+use App\Http\Controllers\Api\MobileController;
 use App\Http\Controllers\Api\EmbedController;
-
+use App\Http\Controllers\Api\LaptopController;
+use App\Http\Controllers\Api\SofaController;
+use App\Http\Controllers\Api\ShirtController;
+use App\Http\Controllers\Api\ToyController;
 
 
 use App\Http\Kernel;
@@ -49,13 +52,18 @@ Route::get('/embed-widget/{api_key}', [EmbedController::class, 'getWidgetData'])
 
 Route::get('/layout-settings', [LayoutSettingController::class, 'getSettings']);
 Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings']);
-
+Route::get('/sofas', [SofaController::class, 'index']);
 Route::get('/embed/popular-products', [ProductController::class, 'embedProducts']);
 Route::get('/default-api-key', [ProductController::class, 'defaultApiKey']);
-
+Route::get('/laptops', [LaptopController::class, 'index']);
 Route::get('/total-users', [UserController::class, 'totalUsers']);
+Route::get('/mobiles', [MobileController::class, 'index']);
+    Route::get('/shirts', [ShirtController::class, 'index']);
+    Route::get('/toys', [ToyController::class, 'index']);
 
-    
+
+
+
 
     Route::prefix('analytics')->group(function () {
         Route::get('/', [AnalyticsController::class, 'index']);                 // 📊 List all analytics
