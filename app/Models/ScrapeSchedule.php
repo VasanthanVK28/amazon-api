@@ -13,17 +13,15 @@ class ScrapeSchedule extends Eloquent
         'frequency',  // 'hourly', 'daily', 'weekly'
         'time',       // e.g., '03:00' for daily/weekly
         'day',        // 'mon', 'tue', ... for weekly
+        'categories',
         'status',     // 'active' or 'inactive'
         'last_run',
         'is_running'
     ];
 
-    protected $hidden = [
-        // Optional: hide MongoDB _id if you want cleaner API output
-        '_id',
-    ];
-
+  
     protected $casts = [
         'last_run' => 'datetime', // ensures Laravel returns Carbon instance
+        'categories' => 'array',
     ];
 }

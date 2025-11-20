@@ -22,6 +22,7 @@ class ScheduleController extends Controller
             'scrapeFrequency' => 'required|string|in:hourly,daily,weekly',
             'scrapeTime' => 'nullable|string',
             'scrapeDay' => 'nullable|string',
+            'categories' => 'required|array',
         ]);
 
         $unique = ['frequency' => $validated['scrapeFrequency']];
@@ -38,6 +39,7 @@ class ScheduleController extends Controller
         $schedule = ScrapeSchedule::updateOrCreate(
             $unique,
             [
+                'categories' => $validated['categories'],
                 'status' => 'active',
                 'last_run' => null,
                 'is_running' => false,
