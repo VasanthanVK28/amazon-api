@@ -166,10 +166,18 @@ class ProductController extends BaseController
                 }
 
                 if (!empty($brandArray)) {
-                    $query['$and'][] = [
-                        '$or' => array_map(fn($brand) => ['brand' => ['$regex' => $brand, '$options' => 'i']], $brandArray)
-                    ];
+                    $brandConditions = [];
+                    foreach ($brandArray as $brand) {
+                        $brand = preg_quote(trim(strtolower($brand))); // escape regex special chars
+                        $brandConditions[] = [
+                            'brand' => ['$regex' => "^$brand$", '$options' => 'i']
+                        ];
+                    }
+
+                    if (!isset($query['$and'])) $query['$and'] = [];
+                    $query['$and'][] = ['$or' => $brandConditions];
                 }
+
 
                 $ratingQuery = [];
                 if ($rating) $ratingQuery['$gte'] = (float)$rating;
