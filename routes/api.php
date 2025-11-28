@@ -58,11 +58,8 @@ Route::get('/total-users', [UserController::class, 'totalUsers']);
 Route::get('/mobiles', [MobileController::class, 'index']);
     Route::get('/shirts', [ShirtController::class, 'index']);
     Route::get('/toys', [ToyController::class, 'index']);
-
-// 🔓 PUBLIC TRANSLATION API (completely open)
-Route::get('/products/translate', [ProductController::class, 'getProducts']);
-
-
+Route::post('schedule/{id}/run', [ScheduleController::class, 'runScrape']);
+Route::get('scrape/logs', [ScheduleController::class, 'logs']); // optional: fetch all logs
 
 
     Route::prefix('analytics')->group(function () {

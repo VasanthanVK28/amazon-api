@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ScrapeSchedule;
+use App\Models\ScrapeLog;
 use Carbon\Carbon;
 
 class ScheduleController extends Controller
@@ -52,4 +53,53 @@ class ScheduleController extends Controller
             'data' => $schedule
         ]);
     }
+
+    public function runScrape($id)
+{
+    $schedule = ScrapeSchedule::find($id);
+
+    if (!$schedule) {
+        return response()->json(['error' => 'Schedule not found'], 404);
+    }
+
+    // Mark schedule as running
+    $schedule->is_running = true;
+    $schedule->save();
+
+    $start = now();
+
+    // ---- Run your scraper here ----
+    // e.g., call Python script, or internal scraping logic
+    // scrapeCategories($schedule->categories);
+
+    $end = now();
+
+    // Update schedule
+    $schedule->last_run = $end;
+    $schedule->is_running = false;
+    $schedule->status = "complete";
+    $schedule->save();
+
+    // Create a log entry
+    ScrapeLog::create([
+        'schedule_id' => $schedule->_id,
+        'frequency'   => $schedule->frequency,
+        'categories'  => $schedule->categories,
+        'start_time'  => $start,
+        'end_time'    => $end,
+        'status'      => 'completed',
+    ]);
+
+    return response()->json([
+        'message' => 'Scrape completed and logged successfully',
+    ]);
+}
+
+public function logs()
+{
+    $logs = ScrapeLog::orderBy('created_at', 'desc')->get();
+    return response()->json(['data' => $logs]);
+}
+
+
 }
