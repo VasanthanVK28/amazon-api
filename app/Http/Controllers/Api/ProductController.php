@@ -10,6 +10,8 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Routing\Controller as BaseController;
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
 
 class ProductController extends BaseController
 {
@@ -19,7 +21,7 @@ class ProductController extends BaseController
     public function __construct()
     {
         $this->middleware('jwt.auth')->except([
-            'index', 'show', 'filter', 'embedProducts', 'defaultApiKey', 'getBrands', 'getCategories'
+            'index', 'show', 'filter', 'embedProducts', 'defaultApiKey', 'getBrands', 'getCategories','getProducts'
         ]);
     }
 
@@ -386,4 +388,42 @@ class ProductController extends BaseController
 
         return response()->json(['categories' => $categories]);
     }
+
+    // ✅ Get products with translation
+   public function getProducts(Request $request)
+{
+    $lang = $request->query('lang', 'en');
+
+    $db = $this->getDB();
+    $translatedProducts = [];
+
+    // Google Translate instance
+    $translator = new GoogleTranslate();
+    $translator->setTarget($lang);
+
+    foreach ($this->collections as $collection) {
+        $items = $db->{$collection}->find()->toArray();
+
+        foreach ($items as $item) {
+            $item['id'] = (string)$item['_id'];
+
+            // Translate title
+            if (!empty($item['title'])) {
+                $item['translated_title'] = $translator->translate($item['title']);
+            } else {
+                $item['translated_title'] = "";
+            }
+
+            $translatedProducts[] = $item;
+        }
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'language' => $lang,
+        'data' => $translatedProducts,
+    ]);
+}
+
+
 }

@@ -42,7 +42,6 @@ Route::group([], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/filter', [ProductController::class, 'filter']);
-    
 
 });
 Route::get('/schedule-scrapes', [ScheduleController::class, 'index']);
@@ -50,8 +49,7 @@ Route::post('/schedule-scrape', [ScheduleController::class, 'store']);
 
 Route::get('/embed-widget/{api_key}', [EmbedController::class, 'getWidgetData']);
 
-Route::get('/layout-settings', [LayoutSettingController::class, 'getSettings']);
-Route::post('/layout-settings', [LayoutSettingController::class, 'updateSettings']);
+
 Route::get('/sofas', [SofaController::class, 'index']);
 Route::get('/embed/popular-products', [ProductController::class, 'embedProducts']);
 Route::get('/default-api-key', [ProductController::class, 'defaultApiKey']);
@@ -61,6 +59,8 @@ Route::get('/mobiles', [MobileController::class, 'index']);
     Route::get('/shirts', [ShirtController::class, 'index']);
     Route::get('/toys', [ToyController::class, 'index']);
 
+// 🔓 PUBLIC TRANSLATION API (completely open)
+Route::get('/products/translate', [ProductController::class, 'getProducts']);
 
 
 
