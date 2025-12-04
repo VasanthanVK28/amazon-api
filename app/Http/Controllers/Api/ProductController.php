@@ -389,5 +389,50 @@ class ProductController extends BaseController
         return response()->json(['categories' => $categories]);
     }
 
+    // 🔍 Real-time search suggestions
+public function suggestions(Request $request)
+{
+    $query = trim($request->query('q'));
+
+    if (!$query) {
+        return response()->json([]);
+    }
+
+    $db = $this->getDB();
+    $regex = new \MongoDB\BSON\Regex($query, 'i');
+
+    $results = [];
+
+    foreach ($this->collections as $collection) {
+        $items = $db->{$collection}->find(
+            [
+                '$or' => [
+                    ['title' => $regex],
+                    ['brand' => $regex],
+                    ['tags'  => $regex],
+                ]
+            ],
+            [
+                'limit' => 8,
+                'projection' => [
+                    'title' => 1,
+                    'brand' => 1,
+                    'image_url' => 1,
+                    'price' => 1,
+                    'asin' => 1,
+                ]
+            ]
+        )->toArray();
+
+        foreach ($items as $item) {
+            $item['_id'] = (string)$item['_id'];
+            $results[] = $item;
+        }
+    }
+
+    return response()->json($results);
+}
+
+    
    
 }

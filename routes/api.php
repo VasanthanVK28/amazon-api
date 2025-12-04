@@ -60,6 +60,7 @@ Route::get('/mobiles', [MobileController::class, 'index']);
     Route::get('/toys', [ToyController::class, 'index']);
 Route::post('schedule/{id}/run', [ScheduleController::class, 'runScrape']);
 Route::get('scrape/logs', [ScheduleController::class, 'logs']); // optional: fetch all logs
+Route::get('/search/suggestions', [ProductController::class, 'suggestions']);
 
 
     Route::prefix('analytics')->group(function () {
