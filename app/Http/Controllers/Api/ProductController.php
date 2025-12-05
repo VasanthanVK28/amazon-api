@@ -390,6 +390,7 @@ class ProductController extends BaseController
     }
 
     // 🔍 Real-time search suggestions
+// 🔍 Real-time search suggestions
 public function suggestions(Request $request)
 {
     $query = trim($request->query('q'));
@@ -407,19 +408,23 @@ public function suggestions(Request $request)
         $items = $db->{$collection}->find(
             [
                 '$or' => [
-                    ['title' => $regex],
-                    ['brand' => $regex],
-                    ['tags'  => $regex],
+                    ['title'       => $regex],
+                    ['brand'       => $regex],
+                    ['tags'        => $regex],
+                    ['description' => $regex],   // ✅ NEW (important)
+                    ['category'    => $regex],   // ✅ NEW
+                    ['keywords'    => $regex],   // ✅ NEW
                 ]
             ],
             [
-                'limit' => 8,
+                'limit' => 10,
                 'projection' => [
-                    'title' => 1,
-                    'brand' => 1,
+                    'title'     => 1,
+                    'brand'     => 1,
                     'image_url' => 1,
-                    'price' => 1,
-                    'asin' => 1,
+                    'price'     => 1,
+                    'asin'      => 1,
+                    'tags'      => 1,
                 ]
             ]
         )->toArray();
