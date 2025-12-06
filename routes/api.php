@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\LaptopController;
 use App\Http\Controllers\Api\SofaController;
 use App\Http\Controllers\Api\ShirtController;
 use App\Http\Controllers\Api\ToyController;
+use App\Http\Controllers\Api\ScraperController;
 
 
 use App\Http\Kernel;
@@ -49,6 +50,7 @@ Route::post('/schedule-scrape', [ScheduleController::class, 'store']);
 
 Route::get('/embed-widget/{api_key}', [EmbedController::class, 'getWidgetData']);
 
+Route::get('admin/products', [ProductController::class, 'allProducts']);
 
 Route::get('/sofas', [SofaController::class, 'index']);
 Route::get('/embed/popular-products', [ProductController::class, 'embedProducts']);
@@ -61,6 +63,7 @@ Route::get('/mobiles', [MobileController::class, 'index']);
 Route::post('schedule/{id}/run', [ScheduleController::class, 'runScrape']);
 Route::get('scrape/logs', [ScheduleController::class, 'logs']); // optional: fetch all logs
 Route::get('/search/suggestions', [ProductController::class, 'suggestions']);
+Route::post('/scrape-products', [ScraperController::class, 'scraper']);
 
 
     Route::prefix('analytics')->group(function () {

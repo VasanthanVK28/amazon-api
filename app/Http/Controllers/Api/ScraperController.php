@@ -1,40 +1,37 @@
 <?php
 
-namespace App\Http\Controllers\Api; // ✅ Must match folder structure
+namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use App\Http\Controllers\Controller;
 
 class ScraperController extends Controller
 {
+    // ✅ Declare the property
+    private static $process = null;
+
     public function scrape(Request $request)
     {
         $query = $request->input('query', 'mobile');
-        $pages = (int) $request->input('pages', 3);
+        $pages = (int)$request->input('pages', 3);
 
-        // Full path to your python executable and project main.py
-        $python = 'C:\\Users\\vasan\\AppData\\Local\\Programs\\Python\\Python314\\python.exe'; // on Windows: C:\\path\\to\\venv\\Scripts\\python.exe
+        $python = 'C:\\Users\\vasan\\AppData\\Local\\Programs\\Python\\Python314\\python.exe';
         $script = 'C:\\scraper_amazon\\main.py';
 
-        // Build command: pass args (safer than concatenating one string)
         $process = new Process([$python, $script, $query, (string)$pages]);
-        // optionally set working directory and env
-        $process->setTimeout(300); // adjust
+        $process->setTimeout(300);
         $process->setIdleTimeout(60);
 
         try {
             $process->mustRun();
 
-            $output = $process->getOutput();
-            // If your Python prints or returns JSON you can decode it:
-            // $data = json_decode($output, true);
-
             return response()->json([
                 'status' => 'ok',
-                'message' => 'Scraping started/completed',
-                'output' => $output,
+                'message' => 'Scraping finished',
+                'output' => $process->getOutput(),
             ]);
         } catch (ProcessFailedException $e) {
             return response()->json([
@@ -45,4 +42,37 @@ class ScraperController extends Controller
             ], 500);
         }
     }
+
+public function scraper(Request $request) 
+{
+    // Get category and pages from request
+    $category = $request->input('query', 'mobile');
+    $pages = (int) $request->input('pages', 5);
+
+    // Python executable & script path
+    $python = 'C:\\Users\\vasan\\AppData\\Local\\Programs\\Python\\Python314\\python.exe';
+    $script = 'C:\\scraper_amazon\\amazon.py';
+
+    // Ensure paths are escaped properly
+    $python = escapeshellarg($python);
+    $script = escapeshellarg($script);
+    $categoryArg = escapeshellarg($category);
+    $pagesArg = escapeshellarg($pages);
+
+    // Command to run asynchronously in background
+    $command = "$python $script $categoryArg $pagesArg > NUL 2>&1 &";
+
+    // Execute the command
+    exec($command);
+
+    // Log the action
+    Log::info("Started scraping for category: {$category}, pages: {$pages}");
+
+    // Return response immediately
+    return response()->json([
+        'status' => 'ok',
+        'message' => "Scraping started for category: {$category}"
+    ]);
+}
+
 }

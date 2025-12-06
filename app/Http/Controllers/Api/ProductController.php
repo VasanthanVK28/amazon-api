@@ -406,7 +406,7 @@ public function suggestions(Request $request)
 
     foreach ($this->collections as $collection) {
         $items = $db->{$collection}->find(
-            [
+            [   
                 '$or' => [
                     ['title'       => $regex],
                     ['brand'       => $regex],
@@ -438,6 +438,35 @@ public function suggestions(Request $request)
     return response()->json($results);
 }
 
-    
+   public function allProducts()
+{
+    $db = $this->getDB();
+    $collections = $this->collections; // ['laptops','mobiles','shirts','sofas','toys'];
+
+    $allProducts = [];
+
+    foreach ($collections as $collection) {
+
+        // Fetch ALL documents from each collection
+        $cursor = $db->{$collection}->find([]);
+
+        foreach ($cursor as $doc) {
+
+            // Convert MongoDB BSON to PHP array
+            $doc['_id'] = (string)$doc['_id'];
+            $doc['collection'] = $collection; // useful for frontend
+
+            $allProducts[] = $doc;
+        }
+    }
+
+    return response()->json([
+        'status' => true,
+        'count' => count($allProducts),
+        'data' => $allProducts
+    ]);
+}
+
+
    
 }
