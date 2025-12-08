@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\SofaController;
 use App\Http\Controllers\Api\ShirtController;
 use App\Http\Controllers\Api\ToyController;
 use App\Http\Controllers\Api\ScraperController;
-
+use App\Http\Controllers\Api\ScrapingController;
 
 use App\Http\Kernel;
 Route::get('/debug-mongo', function () {
@@ -63,7 +63,13 @@ Route::get('/mobiles', [MobileController::class, 'index']);
 Route::post('schedule/{id}/run', [ScheduleController::class, 'runScrape']);
 Route::get('scrape/logs', [ScheduleController::class, 'logs']); // optional: fetch all logs
 Route::get('/search/suggestions', [ProductController::class, 'suggestions']);
-Route::post('/scrape-products', [ScraperController::class, 'scraper']);
+Route::post('/scraper/add', [ScraperController::class, 'addScrapeRequest']);
+Route::get('/scrapes', [ScrapingController::class, 'index']);
+
+
+
+// Optional: Trigger manual scrape immediately
+Route::post('/scraper/run', [ScraperController::class, 'scrapeNow']);
 
 
     Route::prefix('analytics')->group(function () {
