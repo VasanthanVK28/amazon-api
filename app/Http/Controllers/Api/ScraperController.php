@@ -54,34 +54,28 @@ class ScraperController extends Controller
     }
 
 public function addScrapeRequest(Request $request)
-    {
-        $category = trim($request->input('query')); // e.g., "watch", "shoes"
-        if (!$category) {
-            return response()->json(['status' => 'error', 'message' => 'Category is required'], 400);
-        }
-
-        $collection = $this->db->scrape_requests;
-
-        // Insert category only if it doesn't exist
-        if (!$collection->findOne(['category' => $category])) {
-            $collection->insertOne([
-                'category' => $category,
-                'scraped' => false,
-                'requested_at' => new \MongoDB\BSON\UTCDateTime()
-            ]);
-
-            Log::info("📥 New category queued for scraping: {$category}");
-            return response()->json([
-                'status' => 'ok',
-                'message' => "Category '{$category}' queued for scraping"
-            ]);
-        } else {
-            return response()->json([
-                'status' => 'ok',
-                'message' => "Category '{$category}' is already queued"
-            ]);
-        }
+{
+    $category = trim($request->input('query'));
+    if (!$category) {
+        return response()->json(['status' => 'error', 'message' => 'Category is required'], 400);
     }
+
+    $collection = $this->db->scrape_requests;
+
+    // Insert a new request regardless of existing entries
+    $collection->insertOne([
+        'category' => $category,
+        'scraped' => false,
+        'requested_at' => new \MongoDB\BSON\UTCDateTime()
+    ]);
+
+    Log::info("📥 Category queued for scraping (manual/add): {$category}");
+
+    return response()->json([
+        'status' => 'ok',
+        'message' => "Category '{$category}' queued for scraping"
+    ]);
+}
 
     /**
      * Optional: Trigger a manual scrape immediately (not recommended if using scheduler)
