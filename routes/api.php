@@ -64,8 +64,9 @@ Route::post('schedule/{id}/run', [ScheduleController::class, 'runScrape']);
 Route::get('scrape/logs', [ScheduleController::class, 'logs']); // optional: fetch all logs
 Route::get('/search/suggestions', [ProductController::class, 'suggestions']);
 Route::post('/scraper/add', [ScraperController::class, 'addScrapeRequest']);
-Route::get('/scrapes', [ScrapingController::class, 'index']);
-
+Route::get('/scraped-products', [ScrapingController::class, 'index']);
+Route::get('/scraped-products/first', [ScrapingController::class, 'first']);
+Route::get('/scraped-products/count', [ScrapingController::class, 'count']);
 
 
 // Optional: Trigger manual scrape immediately
