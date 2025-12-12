@@ -21,7 +21,14 @@ class ProductController extends BaseController
     public function __construct()
     {
         $this->middleware('jwt.auth')->except([
-            'index', 'show', 'filter', 'embedProducts', 'defaultApiKey', 'getBrands', 'getCategories','getProducts'
+            'index',
+            'show',
+            'filter',
+            'embedProducts',
+            'defaultApiKey',
+            'getBrands',
+            'getCategories',
+            'getProducts'
         ]);
     }
 
@@ -390,83 +397,80 @@ class ProductController extends BaseController
     }
 
     // 🔍 Real-time search suggestions
-// 🔍 Real-time search suggestions
-public function suggestions(Request $request)
-{
-    $query = trim($request->query('q'));
+    // 🔍 Real-time search suggestions
+    public function suggestions(Request $request)
+    {
+        $query = trim($request->query('q'));
 
-    if (!$query) {
-        return response()->json([]);
-    }
-
-    $db = $this->getDB();
-    $regex = new \MongoDB\BSON\Regex($query, 'i');
-
-    $results = [];
-
-    foreach ($this->collections as $collection) {
-        $items = $db->{$collection}->find(
-            [   
-                '$or' => [
-                    ['title'       => $regex],
-                    ['brand'       => $regex],
-                    ['tags'        => $regex],
-                    ['description' => $regex],   // ✅ NEW (important)
-                    ['category'    => $regex],   // ✅ NEW
-                    ['keywords'    => $regex],   // ✅ NEW
-                ]
-            ],
-            [
-                'limit' => 10,
-                'projection' => [
-                    'title'     => 1,
-                    'brand'     => 1,
-                    'image_url' => 1,
-                    'price'     => 1,
-                    'asin'      => 1,
-                    'tags'      => 1,
-                ]
-            ]
-        )->toArray();
-
-        foreach ($items as $item) {
-            $item['_id'] = (string)$item['_id'];
-            $results[] = $item;
+        if (!$query) {
+            return response()->json([]);
         }
-    }
 
-    return response()->json($results);
-}
+        $db = $this->getDB();
+        $regex = new \MongoDB\BSON\Regex($query, 'i');
 
-   public function allProducts()
-{
-    $db = $this->getDB();
-    $collections = $this->collections; // ['laptops','mobiles','shirts','sofas','toys'];
+        $results = [];
 
-    $allProducts = [];
+        foreach ($this->collections as $collection) {
+            $items = $db->{$collection}->find(
+                [
+                    '$or' => [
+                        ['title'       => $regex],
+                        ['brand'       => $regex],
+                        ['tags'        => $regex],
+                        ['description' => $regex],   // ✅ NEW (important)
+                        ['category'    => $regex],   // ✅ NEW
+                        ['keywords'    => $regex],   // ✅ NEW
+                    ]
+                ],
+                [
+                    'limit' => 10,
+                    'projection' => [
+                        'title'     => 1,
+                        'brand'     => 1,
+                        'image_url' => 1,
+                        'price'     => 1,
+                        'asin'      => 1,
+                        'tags'      => 1,
+                    ]
+                ]
+            )->toArray();
 
-    foreach ($collections as $collection) {
-
-        // Fetch ALL documents from each collection
-        $cursor = $db->{$collection}->find([]);
-
-        foreach ($cursor as $doc) {
-
-            // Convert MongoDB BSON to PHP array
-            $doc['_id'] = (string)$doc['_id'];
-            $doc['collection'] = $collection; // useful for frontend
-
-            $allProducts[] = $doc;
+            foreach ($items as $item) {
+                $item['_id'] = (string)$item['_id'];
+                $results[] = $item;
+            }
         }
+
+        return response()->json($results);
     }
 
-    return response()->json([
-        'status' => true,
-        'count' => count($allProducts),
-        'data' => $allProducts
-    ]);
-}
+    public function allProducts()
+    {
+        $db = $this->getDB();
+        $collections = $this->collections; // ['laptops','mobiles','shirts','sofas','toys'];
 
+        $allProducts = [];
 
-   
+        foreach ($collections as $collection) {
+
+            // Fetch ALL documents from each collection
+            $cursor = $db->{$collection}->find([]);
+
+            foreach ($cursor as $doc) {
+
+                // Convert MongoDB BSON to PHP array
+                $doc['_id'] = (string)$doc['_id'];
+                $doc['collection'] = $collection; // useful for frontend
+
+                $allProducts[] = $doc;
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'count' => count($allProducts),
+            'data' => $allProducts
+        ]);
+    }
 }
